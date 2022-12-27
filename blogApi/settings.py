@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # inst_apps
     'rest_framework',
+    'rest_framework.authtoken',
     'dj_rest_auth',
     # my_apps
     'main',
@@ -115,7 +116,30 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Basic Authentication
+# Session Authentication
+# BaseToken Authentication
+# JWT Authentication
+# 2fa Authentication
+    # OTP Authentication
+    # TOTP Authentication
+# OAuth Authentication
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
+
+
+
+
