@@ -16,6 +16,14 @@ class PostListCreateView(generics.ListCreateAPIView):
         return serializers.PostCreateSerializer
 
 
+class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method in ('PUT', 'PATCH'):
+            return serializers.PostCreateSerializer
+        return serializers.
+
 
 
 
