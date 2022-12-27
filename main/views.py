@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 from .models import Category, Post
 from . import serializers
-from .permissions import IsAuthorOrAdmin
+from .permissions import IsAuthorOrAdmin, IsAuthor
 
 
 class PostListCreateView(generics.ListCreateAPIView):
@@ -21,9 +21,12 @@ class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
 
     def get_permissions(self):
-        if self.request.method in ('PUT', 'PATCH', 'DELETE'):
+        if self.request.method == 'DELETE':
             return (permissions.IsAuthenticated(),
                     IsAuthorOrAdmin())
+        elif self.request.method in ('PUT', 'PATCH'):
+            return (permissions.IsAuthenticated(),
+                    IsAuthor())
         return [permissions.AllowAny()]
 
     def get_serializer_class(self):
