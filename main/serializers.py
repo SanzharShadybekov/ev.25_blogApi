@@ -9,8 +9,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
-    # owner_username = serializers.ReadOnlyField(source='owner.username')
-    # category_name = serializers.ReadOnlyField(source='category.name')
+    owner_username = serializers.ReadOnlyField(source='owner.username')
+    category_name = serializers.ReadOnlyField(source='category.name')
 
     class Meta:
         model = Post
