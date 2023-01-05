@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from main.serializers import CommentSerializer
 
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -12,6 +13,15 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ('password',)
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        # print(instance, '!!!!!!!!!!!!!!!!!!!!!!!')
+        # print('-----------')
+        # print(rep, '111111111111')
+        rep['comments'] = CommentSerializer(instance.comments.all(),
+                                            many=True).data
+        return rep
 
 
 class RegisterSerializer(serializers.ModelSerializer):

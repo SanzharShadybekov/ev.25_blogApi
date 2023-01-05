@@ -32,6 +32,21 @@ class Post(models.Model):
         ordering = ('created_at',)
 
 
+class PostImages(models.Model):
+    title = models.CharField(max_length=100, blank=True)
+    image = models.ImageField(upload_to='images/')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE,
+                             related_name='images')
+
+    def generate_name(self):
+        from random import randint
+        return 'image' + str(self.id) + str(randint(100000, 1_000_000))
+
+    def save(self, *args, **kwargs):
+        self.title = self.generate_name()
+        return super(PostImages, self).save(*args, **kwargs)
+
+
 class Comment(models.Model):
     owner = models.ForeignKey('auth.User', related_name='comments',
                               on_delete=models.CASCADE)

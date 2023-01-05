@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
-from .models import Category, Post
+from .models import Category, Post, Comment
 from . import serializers
-from .permissions import IsAuthorOrAdmin, IsAuthor
+from .permissions import IsAuthorOrAdmin, IsAuthor, IsAuthorOrAdminOrPostOwner
 
 
 class PostListCreateView(generics.ListCreateAPIView):
@@ -35,5 +35,23 @@ class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
         return serializers.PostDetailSerializer
 
 
+class CommentCreateView(generics.CreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = serializers.CommentSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
+class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = serializers.CommentSerializer
+
+    def get_permissions(self):
+        if self.request.method in ('PUT', 'PATCH'):
+            return [permissions.IsAuthenticated(), IsAuthor()]
+        elif self.request.method == 'DELETE':
+            return [permissions.IsAuthenticated(),
+                    IsAuthorOrAdminOrPostOwner()]
+        return [permissions.AllowAny()]
