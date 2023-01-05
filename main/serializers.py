@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Post, Comment, PostImages
+from .models import Category, Post, Comment, PostImages, Like
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -74,7 +74,23 @@ class PostCreateSerializer(serializers.ModelSerializer):
         return post
 
 
+class LikeSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.id')
+    owner_username = serializers.ReadOnlyField(source='owner.username')
 
+    class Meta:
+        model = Like
+        fields = '__all__'
 
-
-
+    def validate(self, attrs):
+        # print(self, '!!!!!!!!!!!!!!!!')
+        # print(attrs, '!!!!!!!!!!!!!!!')
+        # print(dir(self.context['request']), '!!!!!!!!!!!')
+        request = self.context['request']
+        user = request.user
+        post = attrs['post']
+        # if post.likes.filter(owner=user).exists():
+        #     raise serializers.ValidationError('You already liked this post!')
+        if user.liked_posts.filter(post=post).exists():
+            raise serializers.ValidationError('You already liked this post!')
+        return attrs
