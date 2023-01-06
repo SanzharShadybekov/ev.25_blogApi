@@ -1,7 +1,9 @@
 from rest_framework import generics, permissions, mixins
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
-from .models import Category, Post, Comment, Like
+from .models import Category, Post, Comment, Like, Favorites
 from . import serializers
 from .permissions import IsAuthorOrAdmin, IsAuthor, IsAuthorOrAdminOrPostOwner
 
@@ -50,6 +52,23 @@ class PostViewSet(ModelViewSet):
             return [permissions.IsAuthenticated(), IsAuthor()]
         # Просматривать могут все, но создовать только аутентифицированный пользователь
         return [permissions.IsAuthenticatedOrReadOnly()]
+
+    # ...api/v1/posts/<id>/favorites/
+    @action(['POST', 'DELETE'], detail=True)
+    def favorites(self, request, pk):
+        post = self.get_object()
+        user = request.user
+        if request.method == 'POST':
+            if user.favorites.filter(post=post).exists():
+                return Response('This post is already in favorites!',
+                                status=400)
+            Favorites.objects.create(owner=user, post=post)
+            return Response('Added to favorites!', status=201)
+        else:
+            if user.favorites.filter(post=post).exists():
+                user.favorites.filter(post=post).delete()
+                return Response('Deleted from favorites!', status=204)
+            return Response('Post is not found!', status=400)
 
 
 class LikeCreateView(generics.CreateAPIView):

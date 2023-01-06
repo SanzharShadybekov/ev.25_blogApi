@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Post, Comment, PostImages, Like
+from .models import Category, Post, Comment, PostImages, Like, Favorites
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -24,9 +24,21 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UsersCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('id', 'body', 'post', 'created_at')
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+        repr['post_title'] = instance.post.title
+        return repr
+
+
 class PostDetailSerializer(serializers.ModelSerializer):
     owner_username = serializers.ReadOnlyField(source='owner.username')
     category_name = serializers.ReadOnlyField(source='category.name')
+
     # images = PostImageSerializer(many=True) # 2ой способ
     # comments = CommentSerializer(many=True)
 
@@ -40,8 +52,10 @@ class PostDetailSerializer(serializers.ModelSerializer):
         rep['comments'] = CommentSerializer(instance.comments.all(),
                                             many=True).data
         rep['images'] = PostImageSerializer(instance.images.all(),
-                                            many=True).data # 1ый способ
-        # rep['comments_count'] = len(rep['comments'])
+                                            many=True).data  # 1ый способ
+        rep['likes_count'] = instance.likes.count()
+        rep['liked_users'] = LikeSerializer(instance=instance.likes.all(),
+                                            many=True).data
         return rep
 
 
@@ -53,6 +67,17 @@ class PostListSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('id', 'title', 'owner', 'owner_username',
                   'category', 'category_name', 'preview')
+
+    def is_liked(self, post, user):
+        return user.liked_posts.filter(post=post).exists()
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+        repr['likes_count'] = instance.likes.count()
+        user = self.context['request'].user
+        if user.is_authenticated:
+            repr['is_liked'] = self.is_liked(instance, user)
+        return repr
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
@@ -94,3 +119,31 @@ class LikeSerializer(serializers.ModelSerializer):
         if user.liked_posts.filter(post=post).exists():
             raise serializers.ValidationError('You already liked this post!')
         return attrs
+
+
+class LikedPostsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ('id', 'post')
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+        repr['post_title'] = instance.post.title
+        preview = instance.post.preview
+        repr['post_preview'] = preview.url
+        return repr
+
+
+class FavoritePostsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorites
+        fields = ('id', 'post')
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+        repr['post_title'] = instance.post.title
+        preview = instance.post.preview
+        repr['post_preview'] = preview.url
+        return repr
+
+

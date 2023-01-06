@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from main.serializers import CommentSerializer
+from main.serializers import CommentSerializer, LikeSerializer, LikedPostsSerializer, UsersCommentSerializer, \
+    FavoritePostsSerializer
 
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -19,8 +20,12 @@ class UserDetailSerializer(serializers.ModelSerializer):
         # print(instance, '!!!!!!!!!!!!!!!!!!!!!!!')
         # print('-----------')
         # print(rep, '111111111111')
-        rep['comments'] = CommentSerializer(instance.comments.all(),
-                                            many=True).data
+        rep['comments'] = UsersCommentSerializer(instance.comments.all(),
+                                                 many=True).data
+        rep['liked_posts'] = LikedPostsSerializer(
+            instance=instance.liked_posts.all(), many=True).data
+        rep['favorite_posts'] = FavoritePostsSerializer(instance.favorites.all(),
+                                                        many=True).data
         return rep
 
 
@@ -55,11 +60,3 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-
-
-
-
-
-
-
-

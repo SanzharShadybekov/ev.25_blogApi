@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register('posts', views.PostViewSet)
                 # .../posts/  -> GET(list), POST(create)
-                # .../posts/123/<id>/  -> GET(retrieve), PUT/PATCH(update),
+                # .../posts/<id>/  -> GET(retrieve), PUT/PATCH(update),
 #                                               DELETE(destroy)
 
 urlpatterns = [
@@ -19,11 +19,9 @@ urlpatterns = [
     # path('posts/<int:pk>/', views.PostDetailView.as_view()),
 ]
 
-# TODO likes count and view
-# TODO favorites
 # TODO followers
 # TODO deploy
 # TODO actions
-
+# TODO search, filter, pagination
 
 

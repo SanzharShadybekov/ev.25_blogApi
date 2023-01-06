@@ -68,3 +68,13 @@ class Like(models.Model):
     class Meta:
         unique_together = ['owner', 'post']
 
+
+class Favorites(models.Model):
+    owner = models.ForeignKey('auth.User', on_delete=models.CASCADE,
+                              related_name='favorites')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE,
+                             related_name='favorites')
+
+    class Meta:
+        unique_together = ['owner', 'post']
+
