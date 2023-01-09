@@ -70,6 +70,39 @@ class PostViewSet(ModelViewSet):
                 return Response('Deleted from favorites!', status=204)
             return Response('Post is not found!', status=400)
 
+    # ...api/v1/posts/5/comments/
+    @action(['GET'], detail=True)
+    def comments(self, request, pk):
+        post = self.get_object()
+        comments = post.comments.all()
+        serializer = serializers.CommentSerializer(instance=comments, many=True)
+        return Response(serializer.data, status=200)
+
+    # ../api/v1/posts/id/get_likes/
+    @action(['GET'], detail=True)
+    def get_likes(self, request, pk):
+        # post = Post.objects.get(id=pk)
+        post = self.get_object()
+        likes = post.likes.all()
+        serializer = serializers.LikeSerializer(instance=likes, many=True)
+        return Response(serializer.data, status=200)
+
+    # ../api/v1/posts/id/like/
+    @action(['POST', 'DELETE'], detail=True)
+    def like(self, request, pk):
+        post = self.get_object()
+        user = request.user
+        if request.method == 'POST':
+            if user.liked_posts.filter(post=post).exists():
+                return Response('This post is already liked!', status=400)
+            Like.objects.create(owner=user, post=post)
+            return Response('You liked the post!', status=201)
+        else:
+            if not user.liked_posts.filter(post=post).exists():
+                return Response('You didn\'t liked this post!', status=400)
+            user.liked_posts.filter(post=post).delete()
+            return Response('Your like is deleted!', status=204)
+
 
 class LikeCreateView(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
