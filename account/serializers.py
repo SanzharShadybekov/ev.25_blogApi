@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+
+from account.models import Follow
 from main.serializers import CommentSerializer, LikeSerializer, LikedPostsSerializer, UsersCommentSerializer, \
     FavoritePostsSerializer
 
@@ -60,3 +62,21 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
+class FollowersSerializer(serializers.ModelSerializer):
+    follower_username = serializers.ReadOnlyField(source='follower.username')
+
+    class Meta:
+        model = Follow
+        exclude = ('following',)
+
+
+class FollowingsSerializer(serializers.ModelSerializer):
+    following_username = serializers.ReadOnlyField(source='following.username')
+
+    class Meta:
+        model = Follow
+        exclude = ('follower',)
+
+

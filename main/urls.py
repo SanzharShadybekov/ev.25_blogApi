@@ -21,6 +21,5 @@ urlpatterns = [
 
 # TODO followers
 # TODO deploy
-# TODO search, filter, pagination
 
 
