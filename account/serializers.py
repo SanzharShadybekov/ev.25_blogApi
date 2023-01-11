@@ -17,6 +17,9 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
         exclude = ('password',)
 
+    def is_followed(self, req_user, detail_user):
+        return req_user.followers.filter(following=detail_user).exists()
+
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         # print(instance, '!!!!!!!!!!!!!!!!!!!!!!!')
@@ -28,6 +31,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
             instance=instance.liked_posts.all(), many=True).data
         rep['favorite_posts'] = FavoritePostsSerializer(instance.favorites.all(),
                                                         many=True).data
+        user = self.context['request'].user
+        rep['is_followed'] = self.is_followed(user, instance)
         return rep
 
 

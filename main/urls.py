@@ -14,12 +14,12 @@ urlpatterns = [
     path('comments/<int:pk>/', views.CommentDetailView.as_view()),
     path('likes/', views.LikeCreateView.as_view()),
     path('likes/<int:pk>/', views.LikeDeleteView.as_view()),
+    path('followings-posts/', views.FollowedUsersPostsView.as_view()),
 
     # path('posts/', views.PostListCreateView.as_view()), # Урлы женериксов
     # path('posts/<int:pk>/', views.PostDetailView.as_view()),
 ]
 
-# TODO followers
 # TODO deploy
 
 

@@ -36,7 +36,7 @@ class UserViewSet(CustomModelViewSet):
     search_fields = ('username', 'email')
 
     def get_permissions(self):
-        if self.action == 'retrieve':
+        if self.action in ('retrieve', 'follow', 'unfollow'):
             return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
 
@@ -55,6 +55,19 @@ class UserViewSet(CustomModelViewSet):
             return Response('You already followed!', status=400)
         Follow.objects.create(follower=user, following=following_user)
         return Response('Successfully followed!', status=201)
+
+    # .../api/v1/accounts/id/unfollow/
+    @action(['DELETE'], detail=True)
+    def unfollow(self, request, pk):
+        following_user = self.get_object()
+        user = request.user
+        account = user.followers.filter(following=following_user)
+        if following_user == user:
+            return Response('You cannot unfollow yourself!', status=400)
+        if not account.exists():
+            return Response('You didn\'t followed to this user!', status=400)
+        account.delete()
+        return Response('Successfully unfollowed!', status=204)
 
 
 class FollowersApiView(APIView):
